@@ -1,1 +1,6 @@
-flask
+Flask
+Flask-Cors
+beautifulsoup4
+requests
+pymongo
+sqlalchemy
