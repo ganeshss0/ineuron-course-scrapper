@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="static/css/style.css" /> 
+    <title>Courses</title>
+</head>
+<body>
+    <div class="table-users">
+        <img src="static/css/ineuron-logo.png" alt="ineuron" >
+        <a href="#live">Live Courses</a>
+        <a href='/raw'>Download</a>
+        <a href='/mongo'>Save to MongoDB</a>
+        <a href='/sql'>Save to SQL</a>
+        
+    </div>
+    <h1><button onClick="window.location.reload();">{{bundle_name}}</button></h1>
+    <form action="/course" method='POST'>
+
+    <section>
+        <ul>
+    {% for course in courses['courses'] %}
+        
+    
+    <h3>
+        <li>
+            <button name="course" value="{{bundle_name}}-courses-{{course['title']}}"><u>{{course['title']}}</u></button>
+        </li>
+    </h3>
+    <ul style="list-style-type:none">
+               <h6><li>{{course['description']}}</li></h6>
+    </ul>
+
+    {% endfor %}
+        </ul>
+    </section>
+
+    <section id="live">
+        <h1>Live Courses</h1>
+        <ul>
+    {% for course in courses['liveCourses'] %}
+ 
+    
+    <h3><li>
+        <button name="course" value="{{bundle_name}}-liveCourses-{{course['title']}}"><u>{{course['title']}}</u></button>
+    </li></h3>
+    <ul style="list-style-type:none">
+               <h6><li>{{course['description']}}</li></h6>
+    </ul>
+
+    {% endfor %}
+        </ul>
+    </section>
+
+</form>
+</body> 
+</html>
