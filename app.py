@@ -1,11 +1,12 @@
 from flask import Flask, render_template, jsonify, request
 from flask_cors import CORS, cross_origin
 from bs4 import BeautifulSoup as BS
-import requests
 import json
 from utility import tools
 from handle_mongo import Store_Mongo
 from handle_sql import Store_Sql
+from handle_pdf import create_pdf
+import logging
 
 class Scrapper(tools):
     KEY_1 = 'props'
@@ -18,6 +19,7 @@ class Scrapper(tools):
     def store_json(self, data: dict):
         with open('data.json', 'w') as File:
             json.dump(data, File)
+        logging.info('Created data.json')
 
     def extract_clean_detail(self, data: dict):
         try:
@@ -73,13 +75,8 @@ class Scrapper(tools):
                     clean_course = self.extract_clean_detail(course)
                     solved_data[bundle_name]['liveCourses'].append(clean_course)
 
-        solved_data['Other Courses'] = {'courses' : [], 'course_link' : 'other_courses', 'liveCourses': []}
+        solved_data['Other Courses'] = {'courses' : [], 'bundle_name' : 'Others Courses', 'liveCourses': [], 'description':['Other Courses'], 'feature':['Courses']}
         for course in data['filter']['initCourses']:
-            try:
-                    timings = course.get('classTimings').get('timings')
-            except:
-                timings = None
-
             if not course['_id'] in bundled:
                 solved_data['Other Courses']['courses'].append(self.extract_clean_detail(course))
 
@@ -100,12 +97,14 @@ class Scrapper(tools):
 
 app = Flask(__name__)
 CORS(app)
+logging.basicConfig(filename = 'app.log', filemode='a', level = logging.DEBUG, format = '%(asctime)s %(levelname)s: %(message)s')
 
 
 
 @app.route('/', methods = ['GET', 'POST'])
 @cross_origin()
 def homepage():
+    logging.info('Home Page Rendered')
     return render_template('index.html')
 
 
@@ -128,7 +127,7 @@ def get_bundles(return_data = False):
     
     if return_data:
         return solved_data
-
+    logging.info('Bundle Page Rendered')
     return render_template('course_bundle.html', bundles = solved_data)
     
 
@@ -141,8 +140,10 @@ def get_course():
     bundle_name, section, course_name = course_detail.split('-')
     for course in data[bundle_name][section]:
         if course['title'] == course_name:
+            logging.info('Course Page Rendered')
             return render_template('course.html', course = course)
 
+    logging.warning('Failed to Fetch Course Data')
     return '<h1>Course is Not Available</h1>'
 
 @app.route('/courses', methods = ['POST'])
@@ -151,27 +152,31 @@ def get_bundle_courses():
     bundle_name = request.form['Bundle']
     data = Scrapper.get_data()
     courses = data[bundle_name]
+    logging.info('Rendered Courses Page')
     return render_template('courses.html', courses = courses, bundle_name = bundle_name)
 
 @app.route('/raw', methods = ['GET', 'POST'])
 @cross_origin()
 def download():
     data = Scrapper.get_data()
+    logging.info('Download Request')
     return jsonify(data)
 
 
 @app.route('/mongo', methods = ['GET', 'POST'])
 @cross_origin()
 def mongoPage():
+    logging.info('Rendered Mongo Page')
     return render_template('mongo.html')
 
 
 @app.route('/sql', methods = ['GET', 'POST'])
 @cross_origin()
 def sqlPage():
+    logging.info('Rendered SQL Page')
     return render_template('sql.html')
 
-@app.route('/result', methods = ['GET', 'POST'])
+@app.route('/result', methods = ['POST'])
 @cross_origin()
 def save_to_db():
     db_name = request.form['DB']
@@ -204,11 +209,24 @@ def save_to_db():
         else:
             return '<h1>Invalid Credentials</h1>'
 
-    
+@app.route('/PDF', methods = ['GET', 'POST'])
+@cross_origin()
+def get_pdf():
+    try:
+        data = Scrapper.get_data()
+        pdf = create_pdf()
+        pdf.pdf(data)
+        with open('data.pdf', 'rb') as File:
+            return File.read()
+    except:
+        logging.error('Unable to Create PDF')
+        return '<h1>Unable to Create PDF File</h1>'
     
 
 
 
 
 if __name__ == '__main__':
+    logging.info('App Started')
     app.run(host = '0.0.0.0')
+

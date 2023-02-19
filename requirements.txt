@@ -3,5 +3,5 @@ Flask-Cors
 beautifulsoup4
 requests
 pymongo
-sqlalchemy
-reportlab
+psycopg2
+fpdf
