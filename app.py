@@ -92,6 +92,7 @@ class Scrapper(tools):
                 data = json.load(File)
         except:
             data = get_bundles(return_data = True)
+        return data
                     
 
 
@@ -136,7 +137,7 @@ def get_bundles(return_data = False):
 @cross_origin()
 def get_course():
     data = Scrapper.get_data()
-
+    course_detail = request.form['course']
     bundle_name, section, course_name = course_detail.split('-')
     for course in data[bundle_name][section]:
         if course['title'] == course_name:
@@ -170,7 +171,7 @@ def mongoPage():
 def sqlPage():
     return render_template('sql.html')
 
-@app.route('/sql', methods = ['GET', 'POST'])
+@app.route('/result', methods = ['GET', 'POST'])
 @cross_origin()
 def save_to_db():
     db_name = request.form['DB']
@@ -180,20 +181,26 @@ def save_to_db():
         connection = request.form['connection_string']
         connect = Store_Mongo(connection)
         if connect.test():
-            result = connect.upload(data)
-            return '<h1>' + result + '</h1>'
+            if connect.upload(data):
+                return '<h1>Successful</h1>'
+            else:
+                '<h1>Failed</h1>'
         else:
             return '<h1>Invalid Credentials</h1>'
 
 
     elif db_name == 'sql':
         server = request.form['server']
+        port = request.form['port']
         database = request.form['database']
         user = request.form['user']
         password = request.form['password']
         connect = Store_Sql(server, database, user, password)
-        if connect.upload(data):
-            return '<h1>Data Saved Successfull</h1>'
+        if connect.test():
+            if connect.upload(data):
+                return '<h1>Successful</h1>'
+            else:
+                '<h1>Failed</h1>'
         else:
             return '<h1>Invalid Credentials</h1>'
 

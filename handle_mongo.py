@@ -12,7 +12,10 @@ class Store_Mongo:
             return False
 
     def upload(self, data):
-        db = self.client['iNeuron_Courses_Data']
-        collection = db['iNeuron_Courses']
-        collection.insert_many(list(data.values()))
-        return 'Data Uploaded Successfully'
+        try:
+            db = self.client['iNeuron_Courses_Data']
+            collection = db['iNeuron_Courses']
+            collection.insert_many(list(data.values()))
+            return True
+        except:
+            return False
