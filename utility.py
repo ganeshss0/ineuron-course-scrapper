@@ -12,7 +12,7 @@ logging.basicConfig(filename = 'app.log', filemode='a', level = logging.DEBUG, f
 
 class tools:
     def get_response(self, url: str, *args, **kwargs) -> str:
-        """Return a response object based on the input url.
+        """Return a response object based on the input url.\n
         Arguments:
             * url -> URL of a website, example: 'https://wikipedia.com'"""
         
@@ -26,14 +26,14 @@ class tools:
         return response.text
 
     def html_parser(self, markup: str, *args, **kwargs) -> 'bs4.BeautifulSoup':
-        """Return a bs4.BeautifulSoup object.
+        """Return a bs4.BeautifulSoup object.\n
         Arguments:
             * markup -> A string consists of HTML tags"""
         
         return BS(markup, 'html.parser')
 
     def html_tag_finder(self, parsed_html: 'bs4.BeautifulSoup', tag_name: str, identifier: dict, *args, **kwargs) -> 'list[bs4.BeautifulSoup]':
-        """Return a list of bs4.BeautifulSoup objects.
+        """Return a list of bs4.BeautifulSoup objects.\n
         Arguments:
             * parsed_html -> A Beautiful Soup Object
             * tag_name -> Name of HTML tag, like 'div', 'p'
@@ -42,7 +42,7 @@ class tools:
         return parsed_html.findAll(tag_name, identifier)
 
     def convert_json(self, script_tags: 'list[str]', *args, **kwargs) -> dict:
-        """Convert JSON written inside HTML script tags into Dictonary.
+        """Convert JSON written inside HTML script tags into Dictonary.\n
         Arguments:
             * script_tags -> A list of bs4.BeautifulSoup object containing HTML script tag."""
 

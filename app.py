@@ -14,6 +14,7 @@ import logging
 ##############################################
 
 class Scrapper(tools):
+    """Main Data Scrapper"""
     # Keys 
     KEY_1 = 'props'
     KEY_2 = 'pageProps'
@@ -64,17 +65,18 @@ class Scrapper(tools):
 
 
     def data_solver(self, data: dict) -> dict:
-        """Return a dictonary object.
+        """Return a dictonary object.\n
         Arguments:
-            * data -> A dictonary of iNeuron.ai/courses raw json data.
-        solved_data Dictonary Structure:
-        {'bundle_name' : {
+            * data -> A dictonary of iNeuron.ai/courses raw json data.\n
+        solved_data Dictonary Structure:\n
+        {
+            {'bundle_name' : {
                             'feature' : list[str],
                             'description' : list[str],
                             'courses' : list[dict],
                             'liveCourses' : list[dict],
-                            'bundle_name' : str
-                         }}"""
+                            'bundle_name' : str}},
+                            ...}"""
         
         # Accessing the main part of dictonary
         data = data[self.KEY_1][self.KEY_2][self.KEY_3]
@@ -111,8 +113,8 @@ class Scrapper(tools):
     
     @staticmethod
     def get_data() -> dict:
-        '''Return a dictonary object.
-        If the data if stored locally then it load the data into a python dictonary object.
+        '''Return a dictonary object.\n
+        If the data if stored locally then it load the data into a python dictonary object.\n
         If not then it download the data.'''
         
         try:
@@ -241,7 +243,7 @@ def save_to_db():
         database = request.form['database']
         user = request.form['user']
         password = request.form['password']
-        connect = Store_Sql(server, database, user, password)
+        connect = Store_Sql(server, database, user, password, port)
         if connect.test():
             if connect.upload(data):
                 return '<h1>Successful</h1>'
