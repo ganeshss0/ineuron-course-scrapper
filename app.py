@@ -8,7 +8,13 @@ from handle_sql import Store_Sql
 from handle_pdf import create_pdf
 import logging
 
+
+##############################################
+########## MAIN APPLICATION FILE #############
+##############################################
+
 class Scrapper(tools):
+    # Keys 
     KEY_1 = 'props'
     KEY_2 = 'pageProps'
     KEY_3 = 'initialState'
@@ -16,27 +22,35 @@ class Scrapper(tools):
     def __init__(self, url: str) -> None:
         self.URL = url
 
-    def store_json(self, data: dict):
+    def store_json(self, data: dict) -> None:
+        """Stores a python dictonary object into a json file(data.json)."""
+        
         with open('data.json', 'w') as File:
             json.dump(data, File)
         logging.info('Created data.json')
 
-    def extract_clean_detail(self, data: dict):
+    def extract_clean_detail(self, data: dict) -> dict:
+        """Return a dictonary after cleaning the input dictonary object."""
+        
+        # Try to get the values of classtimings
         try:
             timings = data['classTimings']['timings']
         except:
             timings = None
+            
+        # Try to get the values of course overview
         try:
             courseMeta = data['courseMeta'][0]['overview']
-
         except:
             courseMeta = None
+            
+        # Try to get the values of instructor details
         try:
             instructor = data['instructorsDetails']
         except:
             instructor = None
         
-    
+   
         return {
         'title' : data.get('title'),
         'description' : data.get('description'), 
@@ -49,7 +63,20 @@ class Scrapper(tools):
 
 
 
-    def data_solver(self, data: dict):
+    def data_solver(self, data: dict) -> dict:
+        """Return a dictonary object.
+        Arguments:
+            * data -> A dictonary of iNeuron.ai/courses raw json data.
+        solved_data Dictonary Structure:
+        {'bundle_name' : {
+                            'feature' : list[str],
+                            'description' : list[str],
+                            'courses' : list[dict],
+                            'liveCourses' : list[dict],
+                            'bundle_name' : str
+                         }}"""
+        
+        # Accessing the main part of dictonary
         data = data[self.KEY_1][self.KEY_2][self.KEY_3]
         solved_data = {}
         bundled = set()
@@ -83,7 +110,11 @@ class Scrapper(tools):
         return solved_data
     
     @staticmethod
-    def get_data():
+    def get_data() -> dict:
+        '''Return a dictonary object.
+        If the data if stored locally then it load the data into a python dictonary object.
+        If not then it download the data.'''
+        
         try:
             with open('./data.json') as File:
                 data = json.load(File)
@@ -94,30 +125,37 @@ class Scrapper(tools):
 
 
     
-
+# Initial the Flask app
 app = Flask(__name__)
 CORS(app)
+
+# Configuring the log file
 logging.basicConfig(filename = 'app.log', filemode='a', level = logging.DEBUG, format = '%(asctime)s %(levelname)s: %(message)s')
 
 
-
+# Adding the homepage route method
 @app.route('/', methods = ['GET', 'POST'])
 @cross_origin()
 def homepage():
+    """Return a render_template object."""
+    
     logging.info('Home Page Rendered')
     return render_template('index.html')
 
 
-
+# Adding the /bundles page route method
 @app.route('/bundles', methods = ['GET', 'POST'])
 @cross_origin()
 def get_bundles(return_data = False):
+    # Creating a instance of Scrapper class with a url
     scrap = Scrapper('https://ineuron.ai/courses')
-
+    
+    # Getting a reponse object
     response = scrap.get_response(url = scrap.URL)
 
     parsed_html = scrap.html_parser(markup = response)
-
+    
+    # Finding the script tag containing json data.
     course_data_tag = scrap.html_tag_finder(parsed_html = parsed_html, tag_name = 'script', identifier = {'id' : '__NEXT_DATA__'})
 
     data = scrap.convert_json(script_tags = course_data_tag)
@@ -131,7 +169,7 @@ def get_bundles(return_data = False):
     return render_template('course_bundle.html', bundles = solved_data)
     
 
-
+# Adding the /course page route method
 @app.route('/course', methods = ['POST'])
 @cross_origin()
 def get_course():
@@ -146,6 +184,7 @@ def get_course():
     logging.warning('Failed to Fetch Course Data')
     return '<h1>Course is Not Available</h1>'
 
+# Adding the /courses page route method
 @app.route('/courses', methods = ['POST'])
 @cross_origin()
 def get_bundle_courses():
@@ -155,6 +194,7 @@ def get_bundle_courses():
     logging.info('Rendered Courses Page')
     return render_template('courses.html', courses = courses, bundle_name = bundle_name)
 
+# Adding the /raw page route method
 @app.route('/raw', methods = ['GET', 'POST'])
 @cross_origin()
 def download():
@@ -162,20 +202,21 @@ def download():
     logging.info('Download Request')
     return jsonify(data)
 
-
+# Adding the /mongo page route method
 @app.route('/mongo', methods = ['GET', 'POST'])
 @cross_origin()
 def mongoPage():
     logging.info('Rendered Mongo Page')
     return render_template('mongo.html')
 
-
+# Adding the /sql page route method
 @app.route('/sql', methods = ['GET', 'POST'])
 @cross_origin()
 def sqlPage():
     logging.info('Rendered SQL Page')
     return render_template('sql.html')
 
+# Adding the /result page route method
 @app.route('/result', methods = ['POST'])
 @cross_origin()
 def save_to_db():
@@ -209,6 +250,7 @@ def save_to_db():
         else:
             return '<h1>Invalid Credentials</h1>'
 
+# Adding the /PDF page route method
 @app.route('/PDF', methods = ['GET', 'POST'])
 @cross_origin()
 def get_pdf():
@@ -228,5 +270,5 @@ def get_pdf():
 
 if __name__ == '__main__':
     logging.info('App Started')
-    app.run(host = '0.0.0.0')
+    app.run(host = '0.0.0.0')                  # App started
 
