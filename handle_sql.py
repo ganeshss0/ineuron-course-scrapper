@@ -10,12 +10,14 @@ class Store_Sql:
         self.user = user
         self.pswd = password
         self.port = port
+        self.sslmode = 'require'
 
     
     def test(self):
        
         try:
-            self.connection = psycopg2.connect(dbname = self.db, host = self.server, user = self.user, password = self.pswd, port = self.port)
+            conn_string = f'host={self.server} port={self.port} dbname={self.db} user={self.user} password={self.pswd} sslmode={self.sslmode}'
+            self.connection = psycopg2.connect(conn_string)
             logging.info('Connected SQL Server')
             return True
         except Exception as e:
@@ -27,10 +29,12 @@ class Store_Sql:
         try:
             cursor = self.connection.cursor()
             for bundle_name, courses in data.items():
+                bundle_name = ''.join(bundle_name.split(' '))
                 cursor.execute(f'CREATE TABLE {bundle_name} (CourseName VARCHAR(255));')
                 for course in courses['courses']:
-                    cursor.execute(f"""INSERT INTO {bundle_name} VALUES('{course["title"]}')""")
+                    cursor.execute(f"""INSERT INTO {bundle_name} VALUES(%s)""", (course['title'],))
             self.connection.commit()
+            cursor.close()
             self.connection.close()
             logging.info('Data Inserted SQL Server')
             return True
