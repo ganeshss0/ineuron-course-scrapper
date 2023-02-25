@@ -232,7 +232,7 @@ def save_to_db():
             if connect.upload(data):
                 return '<h1>Successful</h1>'
             else:
-                '<h1>Failed</h1>'
+                return '<h1>Failed</h1>'
         else:
             return '<h1>Invalid Credentials</h1>'
 
@@ -248,7 +248,7 @@ def save_to_db():
             if connect.upload(data):
                 return '<h1>Successful</h1>'
             else:
-                '<h1>Failed</h1>'
+                return '<h1>Failed</h1>'
         else:
             return '<h1>Invalid Credentials</h1>'
 
