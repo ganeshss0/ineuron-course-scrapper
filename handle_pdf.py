@@ -11,12 +11,13 @@ class create_pdf:
 
             pdf_file.set_font("Arial", size=15)
             for bundle in data.values():
-                pdf_file.cell(w = 100, txt = bundle['bundle_name'])
+                pdf_file.multi_cell(w = 0, h = 10, txt = bundle['bundle_name'], align = 'C')
+                pdf_file.multi_cell(w = 0, h = 10, txt = '=> Description')
                 for description in bundle['description']:
-                    pdf_file.cell(w = 100, txt = description)
-                pdf_file.cell(w = 100, txt = 'Features')
+                    pdf_file.multi_cell(w = 0, h = 10, txt = description)
+                pdf_file.multi_cell(w = 0, h = 10, txt = '=> Features')
                 for feature in bundle['feature']:
-                    pdf_file.cell(w = 100, txt = feature)
+                    pdf_file.multi_cell(w = 0, h = 10, txt = feature)
             pdf_file.output('data.pdf')
             logging.info('Document data.pdf Created')
         except Exception as e:

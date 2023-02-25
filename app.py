@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, render_template, jsonify, request, send_file
 from flask_cors import CORS, cross_origin
 from bs4 import BeautifulSoup as BS
 import json
@@ -260,8 +260,7 @@ def get_pdf():
         data = Scrapper.get_data()
         pdf = create_pdf()
         pdf.pdf(data)
-        with open('data.pdf', 'rb') as File:
-            return File.read()
+        return send_file('data.pdf')
     except:
         logging.error('Unable to Create PDF')
         return '<h1>Unable to Create PDF File</h1>'
